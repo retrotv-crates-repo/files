@@ -1,5 +1,5 @@
 [package]
-name = "file"
+name = "retrotv-file"
 version = "0.0.1-alpha"
 edition = "2024"
 authors = ["RetroTV <yjj8353@gmail.com>"]
