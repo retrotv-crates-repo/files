@@ -1,0 +1,10 @@
+[package]
+name = "file"
+version = "0.0.1-alpha"
+edition = "2024"
+authors = ["RetroTV <yjj8353@gmail.com>"]
+description = "A simple file handling library in Rust."
+license = "MIT"
+repository = "https://github.com/retrotv-crates-repo/files"
+
+[dependencies]
