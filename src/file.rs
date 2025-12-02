@@ -1,5 +1,7 @@
+use std::fs::{metadata, Metadata};
 use std::path::{Path, PathBuf};
 use std::io::Result;
+use sha2::{Digest, Sha256};
 
 pub struct File {
     path: PathBuf,
@@ -12,13 +14,49 @@ impl File {
         }
     }
 
+    /// 해당 경로의 메타데이터를 반환합니다.
+    pub fn metadata(&self) -> Result<Metadata> {
+        metadata(&self.path)
+    }
+
+    /// 해당 경로의 파일 크기를 i64 자료형으로 반환합니다.
+    /// 오류가 발생하면 -1을 반환합니다.
+    pub fn len(&self) -> i64 {
+        match self.metadata() {
+            Ok(meta) => meta.len() as i64,
+            Err(_) => -1,
+        }
+    }
+
+    /// 파일의 SHA-256 해시 값을 반환합니다.
+    /// 파일이 아니거나 오류가 발생하면 빈 문자열을 반환합니다.
+    pub fn hash(&self) -> String {
+        if !self.is_file() {
+            return String::new();
+        }
+
+        match std::fs::read(&self.path) {
+            Ok(content) => {
+                let mut hasher = Sha256::new();
+                hasher.update(content);
+                let result = hasher.finalize();
+                format!("{:x}", result)
+            }
+            Err(_) => String::new(),
+        }
+    }
+
+    pub fn is_match(&self, other: &File) -> bool {
+        self.hash() == other.hash()
+    }
+
     /// 경로가 파일을 가리키는지 확인합니다.
     pub fn is_file(&self) -> bool {
         self.path.is_file()
     }
 
     /// 경로가 디렉토리를 가리키는지 확인합니다.
-    pub fn is_dir(&self) -> bool {
+    pub fn is_directory(&self) -> bool {
         self.path.is_dir()
     }
 
@@ -31,7 +69,7 @@ impl File {
     pub fn rm(&self) -> Result<()> {
         if self.is_file() {
             std::fs::remove_file(&self.path)?;
-        } else if self.is_dir() {
+        } else if self.is_directory() {
             std::fs::remove_dir_all(&self.path)?;
         }
 
@@ -69,10 +107,10 @@ mod tests {
         // exists, is_file, is_dir 테스트
         assert!(file.exists());
         assert!(file.is_file());
-        assert!(!file.is_dir());
+        assert!(!file.is_directory());
 
         assert!(dir.exists());
-        assert!(dir.is_dir());
+        assert!(dir.is_directory());
         assert!(!dir.is_file());
 
         assert!(!non_existent.exists());
