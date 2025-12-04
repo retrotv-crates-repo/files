@@ -5,7 +5,7 @@ edition = "2024"
 authors = ["RetroTV <yjj8353@gmail.com>"]
 description = "A simple file handling library in Rust."
 license = "MIT"
-repository = "https://github.com/retrotv-crates-repo/files"
+repository = "https://github.com/retrotv-crates-repo/file"
 
 [dependencies]
 sha2 = "0.10.9"
