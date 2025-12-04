@@ -38,10 +38,10 @@ impl File {
         match std::fs::read(&self.path) {
             Ok(content) => {
                 let mut hasher = Sha256::new();
-                hasher.update(content);
-                let result = hasher.finalize();
-                format!("{:x}", result)
+                hasher.update(&content);
+                format!("{:x}", hasher.finalize())
             }
+
             Err(_) => String::new(),
         }
     }
