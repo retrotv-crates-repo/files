@@ -46,8 +46,28 @@ impl File {
         }
     }
 
+    /// 다른 파일과 해시 값을 비교하여 일치하는지 확인합니다.
     pub fn is_match(&self, other: &File) -> bool {
+        if !self.is_file() || !other.is_file() {
+            return false;
+        }
+
         self.hash() == other.hash()
+    }
+
+    /// 다른 파일과 Byte 단위로 비교하여 일치하는지 확인합니다.
+    pub fn is_deep_match(&self, other: &File) -> bool {
+        if !self.is_file() || !other.is_file() {
+            return false;
+        }
+
+        let self_content = std::fs::read(&self.path);
+        let other_content = std::fs::read(&other.path);
+
+        match (self_content, other_content) {
+            (Ok(a), Ok(b)) => a == b,
+            _ => false,
+        }
     }
 
     /// 경로가 파일을 가리키는지 확인합니다.
@@ -152,5 +172,54 @@ mod tests {
         // 존재하지 않는 파일을 삭제 시도 시 에러가 발생하지 않고 Ok(())를 반환해야 합니다.
         // is_file()과 is_dir()가 모두 false이므로 rm()은 아무 작업도 하지 않습니다.
         assert!(non_existent_file.rm().is_ok());
+    }
+
+    #[test]
+    fn test_file_len() {
+        let test_dir = setup_test_env("test_file_len");
+        let file_path = test_dir.join("file_with_content.txt");
+        let content = b"Hello, World!";
+        fs::write(&file_path, content).unwrap();
+
+        let file = File::new(&file_path);
+        assert_eq!(file.len(), content.len() as i64);
+    }
+
+    #[test]
+    fn test_is_match() {
+        let test_dir = setup_test_env("test_is_match");
+        let file1_path = test_dir.join("file1.txt");
+        let file2_path = test_dir.join("file2.txt");
+        let file3_path = test_dir.join("file3.txt");
+
+        fs::write(&file1_path, b"Hello, World!").unwrap();
+        fs::write(&file2_path, b"Hello, World!").unwrap();
+        fs::write(&file3_path, b"Different content").unwrap();
+
+        let file1 = File::new(&file1_path);
+        let file2 = File::new(&file2_path);
+        let file3 = File::new(&file3_path);
+
+        assert!(file1.is_match(&file2));
+        assert!(!file1.is_match(&file3));
+    }
+
+    #[test]
+    fn test_is_deep_match() {
+        let test_dir = setup_test_env("test_is_deep_match");
+        let file1_path = test_dir.join("file1.txt");
+        let file2_path = test_dir.join("file2.txt");
+        let file3_path = test_dir.join("file3.txt");
+
+        fs::write(&file1_path, b"Hello, World!").unwrap();
+        fs::write(&file2_path, b"Hello, World!").unwrap();
+        fs::write(&file3_path, b"Different content").unwrap();
+
+        let file1 = File::new(&file1_path);
+        let file2 = File::new(&file2_path);
+        let file3 = File::new(&file3_path);
+
+        assert!(file1.is_deep_match(&file2));
+        assert!(!file1.is_deep_match(&file3));
     }
 }
