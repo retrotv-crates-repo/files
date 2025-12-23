@@ -1,6 +1,6 @@
 [package]
 name = "retrotv-file"
-version = "0.0.4-alpha"
+version = "0.0.5-alpha"
 edition = "2024"
 authors = ["RetroTV <yjj8353@gmail.com>"]
 description = "A simple file handling library in Rust."

@@ -19,13 +19,10 @@ impl File {
         metadata(&self.path)
     }
 
-    /// 해당 경로의 파일 크기를 i64 자료형으로 반환합니다.
-    /// 오류가 발생하면 -1을 반환합니다.
-    pub fn len(&self) -> i64 {
-        match self.metadata() {
-            Ok(meta) => meta.len() as i64,
-            Err(_) => -1,
-        }
+    /// 해당 경로의 파일 크기를 반환합니다.
+    /// metadata를 사용하므로 파일 혹은 디렉터리가 아니면 오류가 발생합니다.
+    pub fn len(&self) -> Result<u64> {
+        Ok(self.metadata()?.len())
     }
 
     /// 파일의 SHA-256 해시 값을 반환합니다.
@@ -182,7 +179,7 @@ mod tests {
         fs::write(&file_path, content).unwrap();
 
         let file = File::new(&file_path);
-        assert_eq!(file.len(), content.len() as i64);
+        assert_eq!(file.len().unwrap(), content.len() as u64);
     }
 
     #[test]
